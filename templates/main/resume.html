@@ -70,6 +70,24 @@ function nlToList(text) {
   return '<ul>' + items.map(t => `<li>${t}</li>`).join('') + '</ul>';
 }
 
+function parseEntries(block) {
+  // Split by --- and map pipe-separated fields
+  const lines = String(block || '').split('---').map(s => s.trim()).filter(Boolean);
+  return lines.map(line => {
+    const parts = line.split('|').map(p => p.trim());
+    return {
+      p0: parts[0] || '',
+      p1: parts[1] || '',
+      p2: parts[2] || '',
+      p3: parts[3] || ''
+    };
+  });
+}
+
+function csvToArray(csv) {
+  return String(csv || '').split(',').map(s => s.trim()).filter(Boolean);
+}
+
 document.getElementById('client-pdf').addEventListener('click', function(){
   const name = (document.querySelector('[name="name"]').value || 'Your Name').trim();
   const summary = document.querySelector('[name="summary"]').value || '';
@@ -77,39 +95,64 @@ document.getElementById('client-pdf').addEventListener('click', function(){
   const education = document.querySelector('[name="education"]').value || '';
   const skills = document.querySelector('[name="skills"]').value || '';
   const certs = document.querySelector('[name="certifications"]').value || '';
+  const expItems = parseEntries(experiences);
+  const eduItems = parseEntries(education);
+  const skillItems = csvToArray(skills);
+  const certItems = parseEntries(certs);
 
-  const summaryBlock = summary ? `<div class="section"><h3>Profile</h3><p>${summary.replace(/\n/g,'<br>')}</p></div>` : '';
-  const expBlock = experiences ? `<div class="section"><h3>Work Experience</h3>${nlToList(experiences)}</div>` : '';
-  const eduBlock = education ? `<div class="section"><h3>Education</h3>${nlToList(education)}</div>` : '';
+  const summaryBlock = summary ? `<div class="section"><h3>Summary</h3><p>${summary.replace(/\n/g,'<br>')}</p></div>` : '';
+  const expBlock = expItems.length ? `<div class="section"><h3>Experience</h3>
+      ${expItems.map(e => `
+        <div class="job">
+          <div class="job-header">
+            <div class="job-date">${e.p2 || ''}</div>
+            <div class="job-company">${e.p0 || ''}</div>
+          </div>
+          <div class="job-title">${e.p1 || ''}</div>
+          ${e.p3 ? `<p class="job-desc">${e.p3}</p>` : ''}
+        </div>`).join('')}
+    </div>` : '';
+  const eduBlock = eduItems.length ? `<div class="section"><h3>Education</h3>
+      <ul class="edu-list">
+        ${eduItems.map(e => `<li><strong>${e.p0}</strong>${e.p1?` — ${e.p1}`:''}${e.p2?` — ${e.p2}`:''} ${e.p3?`(${e.p3})`:''}</li>`).join('')}
+      </ul>
+    </div>` : '';
 
-  const skillsBlock = skills ? `<div class="section"><h4>Skills</h4>${nlToList(skills)}</div>` : '';
-  const certBlock = certs ? `<div class="section"><h4>Certifications</h4>${nlToList(certs)}</div>` : '';
+  const skillsBlock = skillItems.length ? `<div class="section"><h4>Expertise</h4><ul>${skillItems.map(s=>`<li>${s}</li>`).join('')}</ul></div>` : '';
+  const certBlock = certItems.length ? `<div class="section"><h4>Certifications</h4><ul>${certItems.map(c=>`<li>${[c.p0,c.p1,c.p2,c.p3].filter(Boolean).join(' — ')}</li>`).join('')}</ul></div>` : '';
 
   const container = document.getElementById('resume-preview');
   container.style.display = 'block';
   container.innerHTML = `
     <div class="cv-root">
       <style>
-        .cv-root { font-family: 'Arial', sans-serif; width: 850px; margin: 0 auto; display: flex; flex-direction: row; min-height: 900px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); align-items: flex-start; background:#fff; }
+        .cv-root { font-family: 'Arial', sans-serif; width: 850px; margin: 0 auto; display: flex; flex-direction: row; min-height: 900px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); align-items: flex-start; background:#fff; }
         .cv-left { width: 280px; background: #1f2a44; color: #f6f7fb; padding: 28px; display: flex; flex-direction: column; gap: 18px; box-sizing: border-box; }
         .cv-right { flex:1; background: #ffffff; padding: 32px 36px; box-sizing: border-box; }
-        .cv-name { font-size: 28px; font-weight: 800; margin: 0; }
-        .cv-role { font-size: 16px; letter-spacing: 0.5px; margin: 4px 0 18px 0; color: #2b2b2b; }
+        .cv-name { font-size: 34px; font-weight: 800; margin: 0; letter-spacing: 0.5px; }
+        .cv-role { font-size: 16px; letter-spacing: 2px; margin: 6px 0 18px 0; color: #666; text-transform: uppercase; }
         .divider { width: 36px; height: 3px; background: #d9b06b; margin: 10px 0 18px 0; border-radius: 2px; }
-        .section h3 { margin: 0; font-size: 18px; font-weight: 700; color: #1f1f1f; }
+        .section h3 { margin: 0 0 10px 0; font-size: 18px; font-weight: 700; color: #1f1f1f; border-bottom: 1px solid #eee; padding-bottom: 6px; }
         .section h4 { margin: 0 0 6px 0; font-size: 15px; font-weight: 700; color: #f6f7fb; }
         .section p { margin: 8px 0 0 0; line-height: 1.55; color: #333; }
         ul { padding-left: 18px; margin: 8px 0 0 0; color: #333; }
         .cv-left ul { color: #f6f7fb; }
         li { margin: 6px 0; }
         .pill { display: inline-block; padding: 6px 10px; margin: 4px 6px 0 0; background: rgba(255,255,255,0.12); color: #f6f7fb; border-radius: 6px; font-size: 12px; }
+        .job { position: relative; padding-left: 18px; margin: 14px 0 18px 0; }
+        .job:before { content: ''; position: absolute; left: 4px; top: 6px; width: 8px; height: 8px; border-radius: 50%; border: 2px solid #1f2a44; background:#fff; }
+        .job-header { display:flex; gap:10px; font-size:13px; color:#666; }
+        .job-title { font-weight:700; margin:6px 0; }
+        .job-company { font-weight:600; }
+        .job-desc { margin:6px 0 0 0; color:#444; }
+        .edu-list { list-style: none; padding-left: 0; }
+        .edu-list li { margin: 6px 0; }
       </style>
       <div class="cv-left">
-        <div>
-          <div class="section"><h4>Profile</h4><p style="color:#f6f7fb;">${summary ? summary.replace(/\n/g,'<br>') : 'Add your profile summary'}</p></div>
-        </div>
-        ${skills ? `<div class="section"><h4>Skills</h4>${skillsBlock}</div>` : ''}
-        ${certs ? `<div class="section"><h4>Certifications</h4>${certBlock}</div>` : ''}
+        <div class="section"><h4>Profile</h4><p style="color:#f6f7fb;">${summary ? summary.replace(/\n/g,'<br>') : 'Add your profile summary'}</p></div>
+        ${skillsBlock ? `<div class="section">${skillsBlock}</div>` : ''}
+        ${certBlock ? `<div class="section">${certBlock}</div>` : ''}
+        ${eduItems.length ? `<div class="section"><h4>Education</h4><ul>${eduItems.map(e=>`<li>${[e.p0,e.p1,e.p2,e.p3].filter(Boolean).join(' — ')}</li>`).join('')}</ul></div>` : ''}
       </div>
       <div class="cv-right">
         <h1 class="cv-name">${name.toUpperCase()}</h1>
@@ -122,7 +165,7 @@ document.getElementById('client-pdf').addEventListener('click', function(){
     </div>
   `;
 
-  html2pdf().from(container).set({ filename: 'resume_client.pdf', margin: 4 }).save();
+  html2pdf().from(container).set({ filename: 'resume_client.pdf', margin: 10 }).save();
   setTimeout(()=>{ container.style.display = 'none'; container.innerHTML=''; }, 800);
 });
 </script>
