@@ -1,0 +1,166 @@
+{% extends 'main/base.html' %}
+{% block title %}Interview - Career Compass{% endblock %}
+{% block content %}
+<h2>🎯 Mock Interview Practice</h2>
+<p>Practice interviewing for your target role with AI-generated questions. Select from 20 predefined roles or enter a custom role.</p>
+
+<form id="int-form">
+  <label for="role"><strong>Target Role:</strong></label>
+  <select id="role" name="role" required style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:4px; font-size:14px;">
+    <option value="">-- Select a role --</option>
+    {% for role in valid_roles %}
+      <option value="{{ role }}">{{ role }}</option>
+    {% endfor %}
+  </select>
+  
+  <label for="count"><strong>Number of Questions:</strong></label>
+  <select id="count" name="count" required style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:4px; font-size:14px;">
+    <option value="5" selected>5 Questions</option>
+    <option value="10">10 Questions</option>
+    <option value="15">15 Questions</option>
+  </select>
+  
+  <button type="submit" style="width:100%;">Generate MCQ Quiz</button>
+</form>
+
+<div id="questions"></div>
+
+<script>
+document.getElementById('int-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const obj = {};
+  form.forEach((v,k)=>obj[k]=v);
+  const genStart = performance.now();
+  document.getElementById('questions').innerHTML = '<div class="response">Generating MCQs for ' + obj.role + '...</div>';
+  
+  try {
+    const res = await fetch('{% url "interview_api" %}', {
+      method:'POST', 
+      body: JSON.stringify(obj), 
+      headers:{'Content-Type':'application/json'}
+    });
+    
+    const j = await res.json();
+    
+    if(j.error) {
+      document.getElementById('questions').innerHTML = `<div class="error"><strong>Error:</strong> ${j.error}</div>`;
+    } else {
+      const mcqs = j.mcqs || [];
+      const attemptId = j.attempt_id;
+      const genMs = j.generation_ms || Math.round(performance.now() - genStart);
+
+      // Flashcard quiz UI
+      let idx = 0;
+      const selections = new Array(mcqs.length).fill(null);
+      const totalTimeSec = mcqs.length * 30; // 30s per question
+      let timeLeft = totalTimeSec;
+      let timerHandle = null;
+
+      const container = document.getElementById('questions');
+
+      function renderCard() {
+        if (mcqs.length === 0) {
+          container.innerHTML = '<div class="error">No MCQs generated.</div>';
+          return;
+        }
+        const q = mcqs[idx];
+        container.innerHTML = `
+          <div style="background:#e8f5e9; border:1px solid #d4edda; padding:16px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h3 style="margin:0;">🧠 ${obj.role} Quiz</h3>
+              <div style="font-size:12px; color:#666;">Generated in ${Math.max(1, Math.round(genMs))} ms</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin:6px 0 14px 0;">
+              <div style="font-size:13px; color:#333;">Question ${idx+1} / ${mcqs.length}</div>
+              <div id="timer" style="font-size:13px; color:#b00020; font-weight:600;"></div>
+            </div>
+            <div style="background:#fff; padding:14px; border-radius:6px; border:1px solid #eee; margin-bottom:12px;">
+              ${q.question}
+            </div>
+            <div>
+              ${q.options.map((opt,i)=>`
+                <button
+                  data-i="${i}"
+                  class="opt-btn"
+                  style="display:block; width:100%; text-align:left; margin:8px 0; padding:10px 12px; border-radius:6px; border:1px solid ${selections[idx]===i?'#4a6ee0':'#ddd'}; background:${selections[idx]===i?'#e9f0ff':'#fff'}; color:#000; cursor:pointer;">
+                  ${String.fromCharCode(65+i)}. ${opt}
+                </button>`).join('')}
+            </div>
+            <div style="display:flex; justify-content:space-between; gap:8px; margin-top:12px;">
+              <button id="prev" ${idx===0?'disabled':''}>⬅ Prev</button>
+              ${idx < mcqs.length-1 ? '<button id="next">Next ➡</button>' : '<button id="finish" style="background:#28a745">Finish & Score</button>'}
+            </div>
+            <p style="color:#999; font-size:12px; margin-top:10px;">Session ID: ${attemptId}</p>
+          </div>
+        `;
+
+        // Attach option handlers
+        container.querySelectorAll('.opt-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            selections[idx] = parseInt(btn.getAttribute('data-i'));
+            renderCard();
+          });
+        });
+
+        const prev = document.getElementById('prev');
+        if (prev) prev.addEventListener('click', ()=>{ idx=Math.max(0,idx-1); renderCard(); });
+        const next = document.getElementById('next');
+        if (next) next.addEventListener('click', ()=>{ idx=Math.min(mcqs.length-1,idx+1); renderCard(); });
+        const finish = document.getElementById('finish');
+        if (finish) finish.addEventListener('click', scoreAndShow);
+
+        // Update timer text
+        const t = document.getElementById('timer');
+        if (t) {
+          const m = Math.floor(timeLeft/60), s = timeLeft%60;
+          t.textContent = `Time left: ${m}:${s.toString().padStart(2,'0')}`;
+        }
+      }
+
+      function scoreAndShow(){
+        if (timerHandle) { clearInterval(timerHandle); timerHandle=null; }
+        let correct = 0;
+        mcqs.forEach((q,i)=>{ if (selections[i]===q.answer_index) correct++; });
+        const pct = Math.round((correct/mcqs.length)*100);
+        const review = mcqs.map((q,i)=>{
+          const isC = selections[i]===q.answer_index;
+          const chosen = selections[i]!==null ? `${String.fromCharCode(65+selections[i])}. ${q.options[selections[i]]}` : 'No answer';
+          const correctTxt = `${String.fromCharCode(65+q.answer_index)}. ${q.options[q.answer_index]}`;
+          return `<li style="margin-bottom:10px;">
+            <strong>Q${i+1}:</strong> ${q.question}<br>
+            <span style="color:${isC?'#28a745':'#dc3545'}; font-weight:600;">${isC?'Correct':'Incorrect'}</span>
+            <div style="font-size:13px; color:#555;">Your answer: ${chosen} &nbsp; | &nbsp; Correct: ${correctTxt}</div>
+          </li>`;
+        }).join('');
+
+        container.innerHTML = `
+          <div class="success" style="padding:16px;">
+            <h3>✅ Quiz Completed — Score: ${correct}/${mcqs.length} (${pct}%)</h3>
+            <ol style="margin-top:12px;">${review}</ol>
+          </div>`;
+      }
+
+      // Start countdown (optional if possible)
+      if (totalTimeSec > 0) {
+        timerHandle = setInterval(()=>{
+          timeLeft = Math.max(0, timeLeft-1);
+          const t = document.getElementById('timer');
+          if (t) {
+            const m = Math.floor(timeLeft/60), s = timeLeft%60;
+            t.textContent = `Time left: ${m}:${s.toString().padStart(2,'0')}`;
+          }
+          if (timeLeft === 0) {
+            scoreAndShow();
+          }
+        }, 1000);
+      }
+
+      renderCard();
+    }
+  } catch(e) {
+    document.getElementById('questions').innerHTML = `<div class="error">Error: ${e.message}</div>`;
+  }
+})
+</script>
+{% endblock %}

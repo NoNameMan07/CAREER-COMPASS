@@ -1,0 +1,9 @@
+{% extends 'main/base.html' %}
+{% block title %}{{ post.title }} - My Project{% endblock %}
+{% block content %}
+<article>
+  <h2>{{ post.title }}</h2>
+  <p><small>Published {{ post.created_at|date:"SHORT_DATETIME_FORMAT" }}</small></p>
+  <div>{{ post.body|linebreaks }}</div>
+</article>
+{% endblock %}

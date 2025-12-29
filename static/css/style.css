@@ -1,0 +1,5 @@
+body { font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; background: #f7f7f7; }
+.container { max-width: 800px; margin: 24px auto; background: #fff; padding: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+header h1 { margin: 0 0 12px 0; }
+header a { color: #333; text-decoration: none; }
+footer { margin-top: 24px; color: #666; }

@@ -1,0 +1,9 @@
+Django==5.2.8
+reportlab==4.0.0
+requests==2.31.0
+flask==2.3.2
+# sentiment analysis (VADER) - optional but recommended for better results
+vaderSentiment==3.3.2
+# xgboost is optional and heavy; include for completeness
+# Install only if you plan to run ML API: pip install xgboost
+# xgboost==1.7.6

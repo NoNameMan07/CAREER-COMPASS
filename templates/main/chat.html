@@ -1,0 +1,257 @@
+{% extends 'main/base.html' %}
+{% block title %}Chat - Career Compass{% endblock %}
+{% block content %}
+<div style="display:grid; grid-template-columns:1fr 250px; gap:20px;">
+  <div>
+    <h2>💬 AI Career Advisor Chat</h2>
+    <p>Have a conversation with an AI about your career goals, challenges, and questions.</p>
+
+    <div id="messages" style="background:#f9f9f9; padding:20px; border-radius:8px; height:400px; overflow-y:auto; margin-bottom:20px; border:1px solid #ddd;">
+      {% if messages %}
+        {% for message in messages %}
+          <div style="margin-bottom:15px;">
+            {% if message.role == 'user' %}
+              <div style="text-align:right; margin-bottom:5px;"><strong>You</strong></div>
+              <div style="background:#667eea; color:white; padding:10px 15px; border-radius:8px; text-align:right; margin-left:20%;">
+                {{ message.text }}
+              </div>
+            {% else %}
+              <div style="text-align:left; margin-bottom:5px;"><strong>🤖 Advisor</strong></div>
+              <div style="background:#e9ecef; padding:10px 15px; border-radius:8px; text-align:left; margin-right:20%;">
+                {{ message.text|linebreaks }}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div style="color:#999; text-align:center; padding:40px 20px;">
+          <p>No messages yet. Start a conversation!</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <form id="chat-form">
+      <div style="display:flex; gap:10px;">
+        <textarea id="text" name="text" rows="3" placeholder="Ask about career guidance, skills, or opportunities..." style="flex:1; padding:10px; border:1px solid #ddd; border-radius:4px; font-size:14px;"></textarea>
+        <button type="submit" style="padding:10px 20px; height:fit-content;">Send</button>
+      </div>
+    </form>
+    <div id="response"></div>
+  </div>
+
+  <div style="background:white; padding:15px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1); height:fit-content;">
+    <div id="sentiment-widget" style="margin-bottom:12px; padding:10px; border:1px solid #eee; border-radius:6px;">
+      <h4 style="margin:0 0 8px 0;">Sentiment</h4>
+      <div id="sentiment-label" style="font-weight:bold;">{{ sentiment.label }}</div>
+      <div id="sentiment-score" style="color:#666; font-size:13px; margin-top:6px;">Score: {{ sentiment.score }}</div>
+      <button id="toggle-emotions" style="margin-top:10px; padding:6px 12px; border:1px solid #667eea; background:white; color:#667eea; border-radius:4px; cursor:pointer; font-size:12px; width:100%;">Show Detailed Emotions ▼</button>
+      <div id="emotions-detail" style="display:none; margin-top:10px; padding-top:10px; border-top:1px solid #eee;">
+        <div style="font-size:12px; color:#555;">
+          <div class="emotion-item" data-emotion="motivated" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <span>😤 Motivated</span>
+              <span id="emotion-motivated">0%</span>
+            </div>
+            <div style="background:#e9ecef; height:6px; border-radius:3px; overflow:hidden;">
+              <div id="bar-motivated" style="background:#667eea; height:100%; width:0%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div class="emotion-item" data-emotion="eager" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <span>🤩 Eager</span>
+              <span id="emotion-eager">0%</span>
+            </div>
+            <div style="background:#e9ecef; height:6px; border-radius:3px; overflow:hidden;">
+              <div id="bar-eager" style="background:#28a745; height:100%; width:0%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div class="emotion-item" data-emotion="confident" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <span>💪 Confident</span>
+              <span id="emotion-confident">0%</span>
+            </div>
+            <div style="background:#e9ecef; height:6px; border-radius:3px; overflow:hidden;">
+              <div id="bar-confident" style="background:#17a2b8; height:100%; width:0%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div class="emotion-item" data-emotion="anxious" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <span>😰 Anxious</span>
+              <span id="emotion-anxious">0%</span>
+            </div>
+            <div style="background:#e9ecef; height:6px; border-radius:3px; overflow:hidden;">
+              <div id="bar-anxious" style="background:#ffc107; height:100%; width:0%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div class="emotion-item" data-emotion="depressed" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <span>😔 Depressed</span>
+              <span id="emotion-depressed">0%</span>
+            </div>
+            <div style="background:#e9ecef; height:6px; border-radius:3px; overflow:hidden;">
+              <div id="bar-depressed" style="background:#6c757d; height:100%; width:0%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div class="emotion-item" data-emotion="frustrated" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <span>😤 Frustrated</span>
+              <span id="emotion-frustrated">0%</span>
+            </div>
+            <div style="background:#e9ecef; height:6px; border-radius:3px; overflow:hidden;">
+              <div id="bar-frustrated" style="background:#dc3545; height:100%; width:0%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+          <div class="emotion-item" data-emotion="satisfied" style="margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:3px;">
+              <span>😊 Satisfied</span>
+              <span id="emotion-satisfied">0%</span>
+            </div>
+            <div style="background:#e9ecef; height:6px; border-radius:3px; overflow:hidden;">
+              <div id="bar-satisfied" style="background:#20c997; height:100%; width:0%; transition:width 0.3s;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <h4 style="margin-top:0;">Recent Conversations</h4>
+    <div style="max-height:500px; overflow-y:auto;">
+      {% if recent_conversations %}
+        {% for conv in recent_conversations %}
+          <div style="padding:10px; border-bottom:1px solid #eee; font-size:13px;{% if conversation and conv.pk == conversation.pk %} background:#f0f0f0;{% endif %}">
+            <a href="{% url 'chat_conversation' conv.pk %}" style="color:#667eea; text-decoration:none;">
+              {{ conv.title|truncatewords:5 }}
+            </a>
+            <div style="color:#999; font-size:12px; margin-top:3px;">
+              {{ conv.created_at|date:"M d, H:i" }}
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p style="color:#999; font-size:13px;">No conversations yet</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+// Scroll to bottom of messages
+function scrollToBottom() {
+  const messagesDiv = document.getElementById('messages');
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+document.addEventListener('DOMContentLoaded', scrollToBottom);
+
+document.getElementById('chat-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const text = document.getElementById('text').value.trim();
+  if(!text) { alert('Please enter a message'); return; }
+  
+  // Add user message to display
+  const messagesDiv = document.getElementById('messages');
+  const userDiv = document.createElement('div');
+  userDiv.style.marginBottom = '15px';
+  userDiv.innerHTML = `
+    <div style="text-align:right; margin-bottom:5px;"><strong>You</strong></div>
+    <div style="background:#667eea; color:white; padding:10px 15px; border-radius:8px; text-align:right; margin-left:20%;">
+      ${text}
+    </div>
+  `;
+  messagesDiv.appendChild(userDiv);
+  
+  document.getElementById('response').innerHTML = '<div class="response">AI is thinking...</div>';
+  document.getElementById('text').value = '';
+  scrollToBottom();
+  
+  try {
+    const res = await fetch('{% url "chat_api" %}', {
+      method:'POST', 
+      body: JSON.stringify({text}), 
+      headers:{'Content-Type':'application/json'}
+    })
+    const j = await res.json();
+    
+    if(j.error) {
+      document.getElementById('response').innerHTML = `<div class="error">${j.error}</div>`;
+    } else {
+      const resp = j.response || 'No response';
+      const aiDiv = document.createElement('div');
+      aiDiv.style.marginBottom = '15px';
+      aiDiv.innerHTML = `
+        <div style="text-align:left; margin-bottom:5px;"><strong>🤖 Advisor</strong></div>
+        <div style="background:#e9ecef; padding:10px 15px; border-radius:8px; text-align:left; margin-right:20%;">
+          ${resp.replace(/\n/g, '<br>')}
+        </div>
+      `;
+      messagesDiv.appendChild(aiDiv);
+      document.getElementById('response').innerHTML = '';
+      try { updateSentiment(resp); } catch(e) { console.warn('Sentiment update failed', e); }
+      scrollToBottom();
+    }
+  } catch(e) {
+    document.getElementById('response').innerHTML = `<div class="error">Error: ${e.message}</div>`;
+  }
+})
+
+async function updateSentiment(text){
+  try {
+    const r = await fetch('{% url "analyze_sentiment_api" %}', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({text})
+    });
+    const j = await r.json();
+    if(j.score !== undefined){
+      document.getElementById('sentiment-label').textContent = j.label || 'Neutral';
+      document.getElementById('sentiment-score').textContent = 'Score: ' + (typeof j.score === 'number' ? j.score.toFixed(2) : j.score);
+      
+      // Update emotion breakdown if available
+      if(j.raw && j.raw.emotions){
+        const emotions = j.raw.emotions;
+        for(const [emotion, percentage] of Object.entries(emotions)){
+          const percentElem = document.getElementById('emotion-' + emotion);
+          const barElem = document.getElementById('bar-' + emotion);
+          if(percentElem && barElem){
+            percentElem.textContent = percentage.toFixed(1) + '%';
+            barElem.style.width = percentage + '%';
+          }
+        }
+      }
+    }
+  } catch(e){
+    console.warn('Sentiment API error', e);
+  }
+}
+
+// Toggle emotions detail panel
+document.addEventListener('DOMContentLoaded', function(){
+  const toggleBtn = document.getElementById('toggle-emotions');
+  const detailPanel = document.getElementById('emotions-detail');
+  
+  if(toggleBtn && detailPanel){
+    toggleBtn.addEventListener('click', function(){
+      const isHidden = detailPanel.style.display === 'none';
+      detailPanel.style.display = isHidden ? 'block' : 'none';
+      toggleBtn.textContent = isHidden ? 'Hide Detailed Emotions ▲' : 'Show Detailed Emotions ▼';
+    });
+  }
+  
+  // Initialize emotion bars with server-side data
+  {% if sentiment_emotions_json %}
+  try {
+    const emotions = JSON.parse('{{ sentiment_emotions_json|escapejs }}');
+    for(const [emotion, percentage] of Object.entries(emotions)){
+      const percentElem = document.getElementById('emotion-' + emotion);
+      const barElem = document.getElementById('bar-' + emotion);
+      if(percentElem && barElem){
+        percentElem.textContent = percentage.toFixed(1) + '%';
+        barElem.style.width = percentage + '%';
+      }
+    }
+  } catch(e) {
+    console.warn('Failed to parse emotions:', e);
+  }
+  {% endif %}
+});
+</script>
+{% endblock %}

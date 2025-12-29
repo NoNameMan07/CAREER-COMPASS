@@ -1,0 +1,84 @@
+{% extends 'main/base.html' %}
+{% block title %}Home - Career Compass{% endblock %}
+{% block content %}
+<div class="hero">
+  <h2>Welcome to Career Compass</h2>
+  <p>AI-powered career guidance platform to help you explore, prepare, and land your ideal career</p>
+</div>
+
+<div style="background:white; padding:20px; border-radius:8px; margin:20px 0; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
+  <h3>📊 Platform Statistics</h3>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:20px; margin:20px 0;">
+    <div style="background:#f0f0f0; padding:20px; border-radius:8px; text-align:center;">
+      <div style="font-size:28px; font-weight:bold; color:#667eea;">{{ conversations }}</div>
+      <div style="color:#666; margin-top:5px;">Conversations</div>
+    </div>
+    <div style="background:#f0f0f0; padding:20px; border-radius:8px; text-align:center;">
+      <div style="font-size:28px; font-weight:bold; color:#764ba2;">{{ profiles }}</div>
+      <div style="color:#666; margin-top:5px;">Profiles</div>
+    </div>
+    <div style="background:#f0f0f0; padding:20px; border-radius:8px; text-align:center;">
+      <div style="font-size:28px; font-weight:bold; color:#667eea;">{{ interviews }}</div>
+      <div style="color:#666; margin-top:5px;">Interview Attempts</div>
+    </div>
+    <div style="background:#f0f0f0; padding:20px; border-radius:8px; text-align:center;">
+      <div style="font-size:28px; font-weight:bold; color:#764ba2;">{{ resumes }}</div>
+      <div style="color:#666; margin-top:5px;">Resumes Built</div>
+    </div>
+  </div>
+</div>
+
+<h2 style="text-align:center; margin: 40px 0 30px 0;">Explore Our Features</h2>
+<div class="features">
+  <div class="feature-card">
+    <h3>💬 Chat</h3>
+    <p>Have a conversation with an AI career advisor. Ask questions about career paths, skill development, and more.</p>
+    <a href="{% url 'chat' %}">Start Chatting →</a>
+  </div>
+  <div class="feature-card">
+    <h3>🔮 Recommendations</h3>
+    <p>Get personalized career recommendations based on your skills, education, and experience.</p>
+    <a href="{% url 'recommendations' %}">Get Recommendations →</a>
+  </div>
+  <div class="feature-card">
+    <h3>🎯 Interview</h3>
+    <p>Practice interview questions for your target role with AI-generated questions.</p>
+    <a href="{% url 'interview' %}">Practice Now →</a>
+  </div>
+  <div class="feature-card">
+    <h3>📝 Resume</h3>
+    <p>Build a professional resume with comprehensive information about your experience and skills.</p>
+    <a href="{% url 'resume' %}">Build Resume →</a>
+  </div>
+  <div class="feature-card">
+    <h3>📄 Cover Letter</h3>
+    <p>Generate a personalized cover letter for your target position using AI.</p>
+    <a href="{% url 'cover_letter' %}">Generate Letter →</a>
+  </div>
+</div>
+
+<div style="background:#f0f0f0; padding:30px; border-radius:8px; margin:40px 0;">
+  <h2>🚀 Getting Started</h2>
+  <ol style="font-size:16px; line-height:1.8;">
+    <li><strong>Chat with an Advisor:</strong> Start by chatting with our AI career advisor to discuss your goals and concerns.</li>
+    <li><strong>Get Recommendations:</strong> Share your skills and background to receive personalized career suggestions.</li>
+    <li><strong>Practice Interviews:</strong> Prepare for your dream job by practicing interview questions.</li>
+    <li><strong>Build Your Resume:</strong> Create a professional resume that showcases your experience.</li>
+    <li><strong>Generate Cover Letters:</strong> Create tailored cover letters for your job applications.</li>
+  </ol>
+</div>
+
+<div style="background:#d4edda; padding:20px; border-radius:8px; margin:20px 0; border-left:4px solid #28a745;">
+  <h3 style="margin-top:0;">✅ Features Built with Career Compass</h3>
+  <ul style="margin-bottom:0;">
+    <li>AI-Powered Chatbot (Ollama Integration)</li>
+    <li>Career Recommendations Engine</li>
+    <li>Mock Interview System with AI-Generated Questions</li>
+    <li>Professional Resume Builder</li>
+    <li>AI Cover Letter Generator</li>
+    <li>Conversation History & Data Persistence</li>
+    <li>Comprehensive Admin Dashboard</li>
+    <li>20+ Career Roles Supported</li>
+  </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'main/base.html' %}
+{% block title %}Recommendations - Career Compass{% endblock %}
+{% block content %}
+<h2>🔮 Career Recommendations</h2>
+<p>Tell us about yourself and your skills, and we'll recommend careers that match your profile using our ML model.</p>
+
+<form id="rec-form">
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+    <div>
+      <label for="name"><strong>Your Name:</strong></label>
+      <input id="name" name="name" placeholder="John Doe" required />
+    </div>
+    <div>
+      <label for="email"><strong>Email (optional):</strong></label>
+      <input id="email" name="email" type="email" placeholder="your.email@example.com" />
+    </div>
+  </div>
+  
+  <label for="education"><strong>Education Level:</strong></label>
+  <select id="education" name="education" style="width:100%; padding:10px; margin:10px 0; border:1px solid #ddd; border-radius:4px;">
+    <option value="">-- Select --</option>
+    <option value="High School">High School</option>
+    <option value="Bachelors">Bachelor's Degree</option>
+    <option value="Masters">Master's Degree</option>
+    <option value="PhD">PhD</option>
+  </select>
+  
+  <label for="experience"><strong>Years of Experience:</strong></label>
+  <input id="experience" name="experience" type="number" placeholder="0" value="0" min="0" />
+  
+  <label for="skills"><strong>Your Skills (comma-separated):</strong></label>
+  <textarea id="skills" name="skills" placeholder="Python, SQL, JavaScript, Machine Learning, AWS, Leadership..." rows="4"></textarea>
+  
+  <div style="background:#f0f0f0; padding:15px; border-radius:4px; margin:15px 0;">
+    <strong>Available Roles:</strong>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin:10px 0;">
+      {% for role in career_roles %}
+        <button type="button" class="role-btn" data-role="{{ role }}" style="padding:8px; border:2px solid #000000; background:#888888; border-radius:4px; cursor:pointer; transition:all 0.3s;">
+          {{ role }}
+        </button>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <button type="submit" style="width:100%;">Get Career Recommendations</button>
+</form>
+
+<div id="roles"></div>
+
+<script>
+// Add role selection
+document.querySelectorAll('.role-btn').forEach(btn => {
+  btn.addEventListener('click', function(e) {
+    e.preventDefault();
+    this.style.background = this.style.background === '#667eea' ? '#fff' : '#667eea';
+    this.style.color = this.style.color === 'white' ? '#333' : 'white';
+    this.style.borderColor = this.style.borderColor === '#667eea' ? '#ddd' : '#667eea';
+  });
+});
+
+document.getElementById('rec-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const name = document.getElementById('name').value.trim();
+  const skills = document.getElementById('skills').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const education = document.getElementById('education').value;
+  const experience = document.getElementById('experience').value;
+  
+  if(!name || !skills) { 
+    alert('Please fill in name and skills'); 
+    return; 
+  }
+  
+  document.getElementById('roles').innerHTML = '<div class="response">Analyzing your profile...</div>';
+  
+  try {
+    const res = await fetch('{% url "recommend_api" %}', {
+      method:'POST', 
+      body: JSON.stringify({name, skills, email, education, experience}), 
+      headers:{'Content-Type':'application/json'}
+    });
+    
+    const j = await res.json();
+    
+    if(j.error) {
+      document.getElementById('roles').innerHTML = `<div class="error">Error: ${j.error}</div>`;
+    } else {
+      const roles = j.roles || [];
+      const trends = j.trends || {};
+      const html = `
+        <div class="success" style="margin-top:20px;">
+          <h3>✅ Recommended Careers for ${name}</h3>
+          <ol style="margin:15px 0;">
+            ${roles.map((role, i) => {
+              const trend = trends[role] || 'stable';
+              const trendEmoji = trend === 'rising' ? '📈' : trend === 'falling' ? '📉' : '➡️';
+              return `<li style="margin:10px 0; font-size:16px;"><strong>${role}</strong> ${trendEmoji}</li>`;
+            }).join('')}
+          </ol>
+          <p style="color:#28a745;"><strong>Profile saved!</strong> You can view your recommendations in the admin dashboard.</p>
+        </div>
+      `;
+      document.getElementById('roles').innerHTML = html;
+    }
+  } catch(e) {
+    document.getElementById('roles').innerHTML = `<div class="error">Error: ${e.message}</div>`;
+  }
+})
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'main/base.html' %}
+{% block title %}Resume Builder - Career Compass{% endblock %}
+{% block content %}
+<h2>📝 Professional Resume Builder</h2>
+<p>Build your professional resume with comprehensive information and download your data.</p>
+
+<form method="post" id="resume-form">
+  {% csrf_token %}
+  
+  <div style="background:#f0f0f0; padding:20px; border-radius:8px; margin-bottom:20px;">
+    <h3 style="margin-top:0;">Personal Information</h3>
+    {{ form.name }}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+      <div>
+        <label for="{{ form.summary.id_for_label }}"><strong>{{ form.summary.label }}</strong></label>
+        {{ form.summary }}
+      </div>
+    </div>
+  </div>
+
+  <div style="background:#f0f0f0; padding:20px; border-radius:8px; margin-bottom:20px;">
+    <h3 style="margin-top:0;">Professional Background</h3>
+    <label for="{{ form.experiences.id_for_label }}"><strong>{{ form.experiences.label }}</strong></label>
+    <p style="color:#666; font-size:13px;">{{ form.experiences.help_text }}</p>
+    {{ form.experiences }}
+    
+    <label for="{{ form.education.id_for_label }}" style="margin-top:15px;"><strong>{{ form.education.label }}</strong></label>
+    <p style="color:#666; font-size:13px;">{{ form.education.help_text }}</p>
+    {{ form.education }}
+  </div>
+
+  <div style="background:#f0f0f0; padding:20px; border-radius:8px; margin-bottom:20px;">
+    <h3 style="margin-top:0;">Skills & Certifications</h3>
+    <label for="{{ form.skills.id_for_label }}"><strong>{{ form.skills.label }}</strong></label>
+    {{ form.skills }}
+    
+    <label for="{{ form.certifications.id_for_label }}" style="margin-top:15px;"><strong>{{ form.certifications.label }}</strong></label>
+    <p style="color:#666; font-size:13px;">{{ form.certifications.help_text }}</p>
+    {{ form.certifications }}
+  </div>
+
+  <div style="display:flex; gap:12px;">
+    <button type="submit" name="format" value="json" style="flex:1; padding:12px; font-size:15px;">Save & Download JSON</button>
+    <button type="submit" name="format" value="pdf" style="flex:1; padding:12px; font-size:15px;">Save & Download PDF</button>
+    <button type="button" id="client-pdf" style="flex:1; padding:12px; font-size:15px;">Client-side PDF</button>
+  </div>
+</form>
+
+{% if success %}
+<div class="success" style="margin-top:20px;">Resume saved successfully! Check your downloads folder for the JSON file.</div>
+{% endif %}
+
+<div style="background:#f0f0f0; padding:20px; border-radius:8px; margin-top:30px;">
+  <h3>💡 Resume Tips</h3>
+  <ul>
+    <li><strong>Professional Summary:</strong> 2-3 sentences highlighting your key strengths and career goals</li>
+    <li><strong>Work Experience:</strong> List achievements, use action verbs, quantify results (e.g., "improved by 40%")</li>
+    <li><strong>Education:</strong> Include graduation year, GPA if 3.5 or higher</li>
+    <li><strong>Skills:</strong> Prioritize relevant technical and soft skills</li>
+    <li><strong>Certifications:</strong> Add professional certifications and credentials</li>
+  </ul>
+</div>
+<div id="resume-preview" style="display:none;"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+function nlToList(text) {
+  if (!text) return '';
+  const items = text.split('\n').map(t => t.trim()).filter(Boolean);
+  if (!items.length) return '';
+  return '<ul>' + items.map(t => `<li>${t}</li>`).join('') + '</ul>';
+}
+
+document.getElementById('client-pdf').addEventListener('click', function(){
+  const name = (document.querySelector('[name="name"]').value || 'Your Name').trim();
+  const summary = document.querySelector('[name="summary"]').value || '';
+  const experiences = document.querySelector('[name="experiences"]').value || '';
+  const education = document.querySelector('[name="education"]').value || '';
+  const skills = document.querySelector('[name="skills"]').value || '';
+  const certs = document.querySelector('[name="certifications"]').value || '';
+
+  const summaryBlock = summary ? `<div class="section"><h3>Profile</h3><p>${summary.replace(/\n/g,'<br>')}</p></div>` : '';
+  const expBlock = experiences ? `<div class="section"><h3>Work Experience</h3>${nlToList(experiences)}</div>` : '';
+  const eduBlock = education ? `<div class="section"><h3>Education</h3>${nlToList(education)}</div>` : '';
+
+  const skillsBlock = skills ? `<div class="section"><h4>Skills</h4>${nlToList(skills)}</div>` : '';
+  const certBlock = certs ? `<div class="section"><h4>Certifications</h4>${nlToList(certs)}</div>` : '';
+
+  const container = document.getElementById('resume-preview');
+  container.style.display = 'block';
+  container.innerHTML = `
+    <div class="cv-root">
+      <style>
+        .cv-root { font-family: 'Arial', sans-serif; width: 850px; margin: 0 auto; display: flex; flex-direction: row; min-height: 900px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); align-items: flex-start; background:#fff; }
+        .cv-left { width: 280px; background: #1f2a44; color: #f6f7fb; padding: 28px; display: flex; flex-direction: column; gap: 18px; box-sizing: border-box; }
+        .cv-right { flex:1; background: #ffffff; padding: 32px 36px; box-sizing: border-box; }
+        .cv-name { font-size: 28px; font-weight: 800; margin: 0; }
+        .cv-role { font-size: 16px; letter-spacing: 0.5px; margin: 4px 0 18px 0; color: #2b2b2b; }
+        .divider { width: 36px; height: 3px; background: #d9b06b; margin: 10px 0 18px 0; border-radius: 2px; }
+        .section h3 { margin: 0; font-size: 18px; font-weight: 700; color: #1f1f1f; }
+        .section h4 { margin: 0 0 6px 0; font-size: 15px; font-weight: 700; color: #f6f7fb; }
+        .section p { margin: 8px 0 0 0; line-height: 1.55; color: #333; }
+        ul { padding-left: 18px; margin: 8px 0 0 0; color: #333; }
+        .cv-left ul { color: #f6f7fb; }
+        li { margin: 6px 0; }
+        .pill { display: inline-block; padding: 6px 10px; margin: 4px 6px 0 0; background: rgba(255,255,255,0.12); color: #f6f7fb; border-radius: 6px; font-size: 12px; }
+      </style>
+      <div class="cv-left">
+        <div>
+          <div class="section"><h4>Profile</h4><p style="color:#f6f7fb;">${summary ? summary.replace(/\n/g,'<br>') : 'Add your profile summary'}</p></div>
+        </div>
+        ${skills ? `<div class="section"><h4>Skills</h4>${skillsBlock}</div>` : ''}
+        ${certs ? `<div class="section"><h4>Certifications</h4>${certBlock}</div>` : ''}
+      </div>
+      <div class="cv-right">
+        <h1 class="cv-name">${name.toUpperCase()}</h1>
+        <div class="cv-role">Professional Resume</div>
+        <div class="divider"></div>
+        ${summaryBlock}
+        ${expBlock}
+        ${eduBlock}
+      </div>
+    </div>
+  `;
+
+  html2pdf().from(container).set({ filename: 'resume_client.pdf', margin: 4 }).save();
+  setTimeout(()=>{ container.style.display = 'none'; container.innerHTML=''; }, 800);
+});
+</script>
+{% endblock %}

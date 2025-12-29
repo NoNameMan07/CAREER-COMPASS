@@ -1,0 +1,22 @@
+{
+  "Bioinformatics Scientist": ["Python", "R", "Statistics", "Machine Learning", "Bioinformatics"],
+  "Blockchain Developer": ["Solidity", "Smart Contracts", "JavaScript", "Cryptography", "Ethereum"],
+  "Business Analyst": ["SQL", "Excel", "Analytics", "Tableau", "Communication", "Problem Solving"],
+  "Civil Engineer": ["AutoCAD", "Structural Analysis", "Project Management", "Materials"],
+  "Cloud Engineer": ["AWS", "Docker", "Kubernetes", "Linux", "Networking"],
+  "Cybersecurity Analyst": ["Network Security", "SIEM", "Vulnerability Assessment", "Python"],
+  "Data Analyst": ["SQL", "Python", "Tableau", "Excel", "Statistics", "Power BI"],
+  "Data Scientist": ["Python", "R", "SQL", "Machine Learning", "Statistics", "Pandas", "Scikit-learn"],
+  "DevOps Engineer": ["Docker", "Kubernetes", "AWS", "Linux", "Git", "CI/CD", "Terraform"],
+  "Embedded Systems Engineer": ["C/C++", "Microcontrollers", "RTOS", "Electronics"],
+  "Full Stack Developer": ["JavaScript", "React", "Node.js", "HTML/CSS", "SQL", "Git", "REST APIs"],
+  "Machine Learning Engineer": ["Python", "TensorFlow", "PyTorch", "SQL", "Machine Learning", "Git", "AWS"],
+  "Mechanical Design Engineer": ["CAD", "Finite Element Analysis", "Manufacturing", "Materials"],
+  "Product Manager": ["Roadmapping", "User Research", "Analytics", "Prioritization", "Communication"],
+  "Project Manager": ["Planning", "Risk Management", "Communication", "Agile/Scrum"],
+  "Research Scientist": ["Experimental Design", "Statistics", "Python", "Publication Writing"],
+  "Robotics Engineer": ["C++", "ROS", "Computer Vision", "Control Systems"],
+  "Software Developer": ["Python", "Java", "JavaScript", "SQL", "Git", "REST APIs"],
+  "UX/UI Designer": ["Figma", "Adobe XD", "UI Design", "User Research", "Prototyping", "HTML/CSS"],
+  "VLSI Engineer": ["Verilog", "Digital Design", "EDA Tools", "Semiconductor Physics"]
+}

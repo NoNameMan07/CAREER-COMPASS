@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.vscode/
+.idea/
+.DS_Store
+db.sqlite3
+.venv/
+models/*.joblib
+notebooks/.ipynb_checkpoints/
+*.log
+*.tmp

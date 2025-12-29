@@ -1,0 +1,37 @@
+{% extends 'main/base.html' %}
+{% block title %}Cover Letter - Career Compass{% endblock %}
+{% block content %}
+<h2>📄 Cover Letter Generator</h2>
+<p>Generate a professional cover letter tailored to your target role and company.</p>
+
+<form id="cl-form">
+  <label for="name">Your Name:</label>
+  <input id="name" name="name" placeholder="John Doe" required />
+  
+  <label for="role">Target Role:</label>
+  <input id="role" name="role" placeholder="Software Engineer" required />
+  
+  <label for="context">Company Name & Additional Context:</label>
+  <textarea id="context" name="context" rows="4" placeholder="e.g., Applying to Google for a Senior Engineer role. I have 5 years of experience..."></textarea>
+  
+  <button type="submit">Generate Cover Letter</button>
+</form>
+<div id="cl"></div>
+<script>
+document.getElementById('cl-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const form = new FormData(e.target);
+  const obj = {};
+  form.forEach((v,k)=>obj[k]=v);
+  document.getElementById('cl').innerHTML = '<div class="response">Generating cover letter...</div>';
+  try {
+    const res = await fetch('{% url "cover_letter_api" %}', {method:'POST', body: JSON.stringify(obj), headers:{'Content-Type':'application/json'}})
+    const j = await res.json();
+    const letter = j.cover_letter || 'No letter generated';
+    document.getElementById('cl').innerHTML = `<div class="success"><strong>Your Cover Letter:</strong><pre style="background:#fff; padding:15px; border-radius:4px; overflow-x:auto;">${letter}</pre><button onclick="navigator.clipboard.writeText(\`${letter.replace(/`/g, '\\\\`')}\`)">Copy to Clipboard</button></div>`;
+  } catch(e) {
+    document.getElementById('cl').innerHTML = `<div class="error">Error: ${e.message}</div>`;
+  }
+})
+</script>
+{% endblock %}

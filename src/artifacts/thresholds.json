@@ -1,0 +1,22 @@
+{
+  "Bioinformatics Scientist": 0.1,
+  "Blockchain Developer": 0.15000000000000002,
+  "Business Analyst": 0.25000000000000006,
+  "Civil Engineer": 0.7000000000000002,
+  "Cloud Engineer": 0.7000000000000002,
+  "Cybersecurity Analyst": 0.7500000000000002,
+  "Data Analyst": 0.30000000000000004,
+  "Data Scientist": 0.25000000000000006,
+  "DevOps Engineer": 0.3500000000000001,
+  "Embedded Systems Engineer": 0.25000000000000006,
+  "Full Stack Developer": 0.5000000000000001,
+  "Machine Learning Engineer": 0.5000000000000001,
+  "Mechanical Design Engineer": 0.1,
+  "Product Manager": 0.25000000000000006,
+  "Project Manager": 0.6000000000000002,
+  "Research Scientist": 0.40000000000000013,
+  "Robotics Engineer": 0.25000000000000006,
+  "Software Developer": 0.25000000000000006,
+  "UX/UI Designer": 0.30000000000000004,
+  "VLSI Engineer": 0.1
+}
