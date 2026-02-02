@@ -284,6 +284,73 @@ Open your browser and navigate to:
 
 ---
 
+## ⚡ Quick Start Commands
+
+### **Windows (PowerShell) - Copy & Paste**
+
+```powershell
+# Clone repo
+git clone https://github.com/NoNameMan07/CAREER-COMPASS.git
+cd CAREER-COMPASS
+
+# Setup
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+
+# Run
+python manage.py runserver
+# Visit: http://127.0.0.1:8000/recommendations/
+```
+
+### **macOS/Linux (Terminal) - Copy & Paste**
+
+```bash
+# Clone repo
+git clone https://github.com/NoNameMan07/CAREER-COMPASS.git
+cd CAREER-COMPASS
+
+# Setup
+python3 -m venv .venv
+source .venv/bin/activate
+python3 -m pip install --upgrade pip
+pip3 install -r requirements.txt
+python3 manage.py migrate
+python3 manage.py createsuperuser
+
+# Run
+python3 manage.py runserver
+# Visit: http://127.0.0.1:8000/recommendations/
+```
+
+### **Optional: Start Ollama (Local LLM)**
+
+**All Platforms:**
+```bash
+# In a separate terminal
+ollama serve
+
+# In another terminal
+ollama pull mistral
+```
+
+### **Common Commands After Setup**
+
+| Command | Windows | macOS/Linux |
+|---------|---------|------------|
+| Activate venv | `.venv\Scripts\Activate.ps1` | `source .venv/bin/activate` |
+| Run server | `python manage.py runserver` | `python3 manage.py runserver` |
+| Make migrations | `python manage.py makemigrations` | `python3 manage.py makemigrations` |
+| Migrate DB | `python manage.py migrate` | `python3 manage.py migrate` |
+| Create admin | `python manage.py createsuperuser` | `python3 manage.py createsuperuser` |
+| Train ML model | `python scripts/train_role_model.py` | `python3 scripts/train_role_model.py` |
+| Access admin | http://127.0.0.1:8000/admin/ | http://127.0.0.1:8000/admin/ |
+
+---
+
 ## 🎯 Using the Application
 
 ### **1. Career Recommendations**
