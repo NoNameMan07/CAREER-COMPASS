@@ -60,17 +60,34 @@ Before starting, ensure you have installed:
 - **pip** (comes with Python)
 
 #### Verify installations:
+
+**Windows (PowerShell):**
 ```powershell
 python --version
 git --version
 pip --version
 ```
 
+**macOS/Linux (Terminal):**
+```bash
+python3 --version
+git --version
+pip3 --version
+```
+
 ---
 
 ### **Step 1: Clone the Repository**
 
+**Windows (PowerShell):**
 ```powershell
+cd Desktop
+git clone https://github.com/NoNameMan07/CAREER-COMPASS.git
+cd CAREER-COMPASS
+```
+
+**macOS/Linux (Terminal):**
+```bash
 cd Desktop
 git clone https://github.com/NoNameMan07/CAREER-COMPASS.git
 cd CAREER-COMPASS
@@ -102,9 +119,16 @@ source .venv/bin/activate
 
 ### **Step 3: Upgrade pip & Install Dependencies**
 
+**Windows (PowerShell):**
 ```powershell
 python -m pip install --upgrade pip
 pip install -r requirements.txt
+```
+
+**macOS/Linux (Terminal):**
+```bash
+python3 -m pip install --upgrade pip
+pip3 install -r requirements.txt
 ```
 
 **Key packages installed:**
@@ -119,9 +143,16 @@ pip install -r requirements.txt
 
 ### **Step 4: Database Setup**
 
+**Windows (PowerShell):**
 ```powershell
 python manage.py makemigrations
 python manage.py migrate
+```
+
+**macOS/Linux (Terminal):**
+```bash
+python3 manage.py makemigrations
+python3 manage.py migrate
 ```
 
 This creates the SQLite database and applies all migrations.
@@ -130,8 +161,14 @@ This creates the SQLite database and applies all migrations.
 
 ### **Step 5: Create Django Superuser (Admin Access)**
 
+**Windows (PowerShell):**
 ```powershell
 python manage.py createsuperuser
+```
+
+**macOS/Linux (Terminal):**
+```bash
+python3 manage.py createsuperuser
 ```
 
 Follow prompts:
@@ -146,13 +183,27 @@ Password: (choose a secure password)
 ### **Step 6: Verify ML Model Setup**
 
 The pre-trained role matcher model should exist at `models/role_matcher.joblib`:
+
+**Windows (PowerShell):**
 ```powershell
 ls models/  # Verify role_matcher.joblib exists
 ```
 
+**macOS/Linux (Terminal):**
+```bash
+ls models/  # Verify role_matcher.joblib exists
+```
+
 If missing, regenerate it:
+
+**Windows (PowerShell):**
 ```powershell
 python scripts/train_role_model.py
+```
+
+**macOS/Linux (Terminal):**
+```bash
+python3 scripts/train_role_model.py
 ```
 
 This trains the ML model on the synthetic career dataset.
@@ -163,29 +214,51 @@ This trains the ML model on the synthetic career dataset.
 
 For AI chat and interview MCQ generation without external API calls:
 
-1. Install Ollama: https://ollama.ai/
-2. Start Ollama service:
-```powershell
-ollama serve
-```
+1. **Install Ollama:**
+   - Windows/macOS/Linux: https://ollama.ai/
 
-3. In another terminal, pull Mistral model:
-```powershell
-ollama pull mistral
-```
+2. **Start Ollama service:**
 
-4. Verify in Django settings (`myproject/settings.py`):
-```python
-OLLAMA_URL = "http://localhost:11434"
-OLLAMA_MODEL = "mistral"
-```
+   **Windows (PowerShell):**
+   ```powershell
+   ollama serve
+   ```
+
+   **macOS/Linux (Terminal):**
+   ```bash
+   ollama serve
+   ```
+
+3. **In another terminal, pull Mistral model:**
+
+   **Windows (PowerShell):**
+   ```powershell
+   ollama pull mistral
+   ```
+
+   **macOS/Linux (Terminal):**
+   ```bash
+   ollama pull mistral
+   ```
+
+4. **Verify in Django settings** (`myproject/settings.py`):
+   ```python
+   OLLAMA_URL = "http://localhost:11434"
+   OLLAMA_MODEL = "mistral"
+   ```
 
 ---
 
 ### **Step 8: Start Development Server**
 
+**Windows (PowerShell):**
 ```powershell
 python manage.py runserver
+```
+
+**macOS/Linux (Terminal):**
+```bash
+python3 manage.py runserver
 ```
 
 Output:
@@ -425,36 +498,85 @@ Uses VADER (Valence Aware Dictionary and sEntiment Reasoner):
 
 ## 🚨 Troubleshooting
 
-### **Issue: Virtual environment not activating**
+### **Issue: Virtual environment not activating (Windows)**
 **Solution:**
 ```powershell
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 .venv\Scripts\Activate.ps1
 ```
 
-### **Issue: "ModuleNotFoundError: No module named 'django'"**
+### **Issue: Virtual environment not activating (macOS/Linux)**
 **Solution:**
+```bash
+source .venv/bin/activate
+# Verify activation - prompt should show (.venv)
+```
+
+### **Issue: "ModuleNotFoundError: No module named 'django'"**
+**Windows:**
 ```powershell
 pip install -r requirements.txt
 ```
 
+**macOS/Linux:**
+```bash
+pip3 install -r requirements.txt
+```
+
 ### **Issue: "Port 8000 is already in use"**
-**Solution:**
+**Windows:**
 ```powershell
 python manage.py runserver 8001  # Use different port
 ```
 
+**macOS/Linux:**
+```bash
+python3 manage.py runserver 8001  # Use different port
+```
+
 ### **Issue: Model not found (role_matcher.joblib missing)**
-**Solution:**
+**Windows:**
 ```powershell
 python scripts/train_role_model.py
 ```
 
+**macOS/Linux:**
+```bash
+python3 scripts/train_role_model.py
+```
+
 ### **Issue: Ollama connection error**
 **Solution:**
-- Ensure Ollama is running: `ollama serve`
-- Check `OLLAMA_URL` in `myproject/settings.py` is correct
+- Ensure Ollama is running in a separate terminal:
+  ```bash
+  ollama serve
+  ```
+- Check `OLLAMA_URL` in `myproject/settings.py` is correct: `http://localhost:11434`
 - Fallback: System uses heuristic scoring without Ollama
+
+### **Issue: Database errors**
+**Windows:**
+```powershell
+python manage.py migrate --run-syncdb
+python manage.py makemigrations
+python manage.py migrate
+```
+
+**macOS/Linux:**
+```bash
+python3 manage.py migrate --run-syncdb
+python3 manage.py makemigrations
+python3 manage.py migrate
+```
+
+### **Issue: "Permission denied" errors on macOS/Linux**
+**Solution:**
+```bash
+chmod +x manage.py
+python3 manage.py [command]
+```
+
+---
 
 ### **Issue: Database errors**
 **Solution:**
